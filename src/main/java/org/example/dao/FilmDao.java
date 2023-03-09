@@ -2,18 +2,15 @@ package org.example.dao;
 
 import org.example.model.Film;
 import org.example.utils.DbConnector;
+import org.example.utils.TransactionManager;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import javax.persistence.EntityManager;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
+import java.util.List;
 
 public class FilmDao {
-
-    private static final String INSERT_QUERY = "INSERT INTO FILM(TITLE, DIRECTOR_ID) VALUES (?,?);";
-    private static final String GET_BY_NAME_QUERY = "SELECT * FROM FILM WHERE TITLE = ?;";
-    private static final String UPDATE_QUERY = "UPDATE FILM SET TITLE = ?, DIRECTOR_ID = ? WHERE ID = ?;";
-    private static final String DELETE_QUERY = "DELETE FROM FILM WHERE ID = ?;";
 
     /**
      * Сохранение фильма
@@ -21,16 +18,7 @@ public class FilmDao {
      * @param film данные режисёра
      */
     public void create(Film film) {
-        try (Connection connection = DbConnector.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement(INSERT_QUERY)) {
-
-            preparedStatement.setString(1, film.getTitle());
-            preparedStatement.setObject(2, film.getDirector());
-
-            preparedStatement.execute();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+        TransactionManager.doInTransaction(entityManager -> entityManager.persist(film));
     }
 
     /**
@@ -40,23 +28,18 @@ public class FilmDao {
      * @return данные фильма
      */
     public Film getByTitle(String title) {
-        try (Connection connection = DbConnector.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement(GET_BY_NAME_QUERY)) {
+        EntityManager entityManager = DbConnector.getEntityManager();
+        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Film> filmCriteriaQuery = criteriaBuilder.createQuery(Film.class);
+        Root<Film> root = filmCriteriaQuery.from(Film.class);
+        filmCriteriaQuery.where(criteriaBuilder.equal(root.get("title"), title));
 
-            preparedStatement.setString(1, title);
-            ResultSet result = preparedStatement.executeQuery();
-
-            Film film = null;
-
-            if (result.next()) {
-                film = new Film(result.getInt("id"), result.getString("title"), (Integer) result.getObject("director_id"));
-            }
-
-            return film;
-
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
+        List<Film> films = entityManager.createQuery(filmCriteriaQuery).getResultList();
+        if (!films.isEmpty()) {
+            return films.get(0);
         }
+
+        return null;
     }
 
     /**
@@ -65,17 +48,10 @@ public class FilmDao {
      * @param film данные фильма
      */
     public void update(Film film) {
-        try (Connection connection = DbConnector.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_QUERY)) {
-
-            preparedStatement.setString(1, film.getTitle());
-            preparedStatement.setObject(2, film.getDirector());
-            preparedStatement.setInt(3, film.getId());
-
-            preparedStatement.execute();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+        TransactionManager.doInTransaction(entityManager -> {
+            Film attachedFilm = entityManager.merge(film);
+            entityManager.persist(attachedFilm);
+        });
     }
 
     /**
@@ -84,13 +60,9 @@ public class FilmDao {
      * @param id идентификатр фильма
      */
     public void delete(int id) {
-        try (Connection connection = DbConnector.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement(DELETE_QUERY)) {
-
-            preparedStatement.setInt(1, id);
-            preparedStatement.execute();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+        TransactionManager.doInTransaction(entityManager -> {
+            Film attachedFilm = entityManager.find(Film.class, id);
+            entityManager.remove(attachedFilm);
+        });
     }
 }

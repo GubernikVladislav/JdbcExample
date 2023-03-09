@@ -2,18 +2,15 @@ package org.example.dao;
 
 import org.example.model.Director;
 import org.example.utils.DbConnector;
+import org.example.utils.TransactionManager;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import javax.persistence.EntityManager;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.criteria.Root;
+import java.util.List;
 
 public class DirectorDao {
-
-    private static final String INSERT_QUERY = "INSERT INTO DIRECTOR(NAME) VALUES(?);";
-    private static final String GET_BY_NAME_QUERY = "SELECT * FROM DIRECTOR WHERE NAME = ?;";
-    private static final String UPDATE_QUERY = "UPDATE DIRECTOR SET NAME = ? WHERE ID = ?;";
-    private static final String DELETE_QUERY = "DELETE FROM DIRECTOR WHERE ID = ?;";
 
     /**
      * Сохранение режисёра
@@ -21,14 +18,7 @@ public class DirectorDao {
      * @param director данные режисёра
      */
     public void create(Director director) {
-        try (Connection connection = DbConnector.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement(INSERT_QUERY)) {
-
-            preparedStatement.setString(1, director.getName());
-            preparedStatement.execute();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+        TransactionManager.doInTransaction(entityManager -> entityManager.persist(director));
     }
 
     /**
@@ -38,23 +28,20 @@ public class DirectorDao {
      * @return данные режисёра
      */
     public Director getByName(String name) {
-        try (Connection connection = DbConnector.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement(GET_BY_NAME_QUERY)) {
+        EntityManager entityManager = DbConnector.getEntityManager();
 
-            preparedStatement.setString(1, name);
-            ResultSet result = preparedStatement.executeQuery();
+        CriteriaBuilder criteriaBuilder = entityManager.getCriteriaBuilder();
+        CriteriaQuery<Director> directorCriteriaQuery = criteriaBuilder.createQuery(Director.class);
+        Root<Director> root = directorCriteriaQuery.from(Director.class);
+        directorCriteriaQuery.where(criteriaBuilder.equal(root.get("name"), name));
 
-            Director director = null;
+        List<Director> result = entityManager.createQuery(directorCriteriaQuery).getResultList();
 
-            if (result.next()) {
-                director = new Director(result.getInt("id"), result.getString("name"));
-            }
-
-            return director;
-
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
+        if (!result.isEmpty()) {
+            return result.get(0);
         }
+
+        return null;
     }
 
     /**
@@ -63,15 +50,10 @@ public class DirectorDao {
      * @param director новые данные режсёра
      */
     public void update(Director director) {
-        try (Connection connection = DbConnector.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement(UPDATE_QUERY)) {
-
-            preparedStatement.setString(1, director.getName());
-            preparedStatement.setInt(2, director.getId());
-            preparedStatement.execute();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+        TransactionManager.doInTransaction(entityManager -> {
+            Director attachedEntity = entityManager.merge(director);
+            entityManager.persist(attachedEntity);
+        });
     }
 
     /**
@@ -80,13 +62,9 @@ public class DirectorDao {
      * @param id идентификатор режисёра
      */
     public void delete(int id) {
-        try (Connection connection = DbConnector.getConnection();
-             PreparedStatement preparedStatement = connection.prepareStatement(DELETE_QUERY)) {
-
-            preparedStatement.setInt(1, id);
-            preparedStatement.execute();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
-        }
+        TransactionManager.doInTransaction(entityManager -> {
+            Director director = entityManager.find(Director.class, id);
+            entityManager.remove(director);
+        });
     }
 }

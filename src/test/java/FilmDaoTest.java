@@ -24,7 +24,7 @@ public class FilmDaoTest {
         Director createdDirector = directorDao.getByName(directorName);
 
         String filmTitle = RandomStringUtils.randomAlphabetic(10);
-        Film film = new Film(filmTitle, createdDirector.getId());
+        Film film = new Film(filmTitle, createdDirector);
 
         //Сохранение фильма и проверка, что не возникает исключение
         Assertions.assertDoesNotThrow(() -> filmDao.create(film));
@@ -38,7 +38,7 @@ public class FilmDaoTest {
         //Проверка корректного заполнения всех полей
         Assertions.assertEquals(createdFilm.getTitle(), filmTitle);
         Assertions.assertTrue(createdFilm.getId() > 0);
-        Assertions.assertEquals(createdFilm.getDirector(), createdDirector.getId());
+        Assertions.assertEquals(createdFilm.getDirector().getId(), createdDirector.getId());
     }
 
     @Test
@@ -71,7 +71,7 @@ public class FilmDaoTest {
     @Test
     public void createWithIncorrectDirector() {
         String filmTitle = RandomStringUtils.randomAlphabetic(10);
-        Film film = new Film(filmTitle, 0); //Все идентификаторы больше нуля, режисёра с идентификатором 0 не существует
+        Film film = new Film(filmTitle, new Director()); //Все идентификаторы больше нуля, режисёра с идентификатором 0 не существует
 
         //Пытаемся сохранить фильм, ожидаем исключение
         Assertions.assertThrows(Exception.class, () -> filmDao.create(film));
@@ -89,7 +89,7 @@ public class FilmDaoTest {
         Director createdDirector = directorDao.getByName(directorName);
 
         String filmTitle = RandomStringUtils.randomAlphabetic(10);
-        Film film = new Film(filmTitle, createdDirector.getId());
+        Film film = new Film(filmTitle, createdDirector);
 
         filmDao.create(film);
 
@@ -101,7 +101,7 @@ public class FilmDaoTest {
         directorDao.create(newDirector);
         Director newCreatedDirector = directorDao.getByName(newDirectorName);
 
-        createdFilm.setDirector(newCreatedDirector.getId());
+        createdFilm.setDirector(newCreatedDirector);
 
         //Смена названия фильма
         String newFilmTitle = RandomStringUtils.randomAlphabetic(10);
@@ -115,7 +115,7 @@ public class FilmDaoTest {
         //Проверка корректного заполнения всех полей
         Assertions.assertEquals(newFilmTitle, updatedFilm.getTitle());
         Assertions.assertEquals(createdFilm.getId(), updatedFilm.getId());
-        Assertions.assertEquals(newCreatedDirector.getId(), updatedFilm.getDirector());
+        Assertions.assertEquals(newCreatedDirector.getId(), updatedFilm.getDirector().getId());
     }
 
     @Test
@@ -129,7 +129,7 @@ public class FilmDaoTest {
         //Проверка, что при удалении не возникает исключение
         Assertions.assertDoesNotThrow(() -> filmDao.delete(createdFilm.getId()));
 
-        //Проврка, что после удаления фильм отсутсвует
+        //Проверка, что после удаления фильм отсутсвует
         Film filmAfterDelete = filmDao.getByTitle(filmTitle);
         Assertions.assertNull(filmAfterDelete);
     }

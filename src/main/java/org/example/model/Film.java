@@ -1,5 +1,9 @@
 package org.example.model;
 
+import java.util.HashSet;
+import java.util.Objects;
+import java.util.Set;
+
 /**
  * Фильм
  */
@@ -16,22 +20,28 @@ public class Film {
     private String title;
 
     /**
-     * Идентификатор режисера
-     * <p>
-     * {@link Director}
+     * Режиссёр
      */
-    private Integer director;
+    private Director director;
+
+    /**
+     * Список актеров
+     */
+    private Set<Actor> actors;
+
+    public Film() {
+    }
 
     public Film(String title) {
         this.title = title;
     }
 
-    public Film(String title, Integer director) {
+    public Film(String title, Director director) {
         this.title = title;
         this.director = director;
     }
 
-    public Film(int id, String title, Integer director) {
+    public Film(int id, String title, Director director) {
         this.id = id;
         this.title = title;
         this.director = director;
@@ -53,12 +63,30 @@ public class Film {
         this.title = title;
     }
 
-    public Integer getDirector() {
+    public Director getDirector() {
         return director;
     }
 
-    public void setDirector(Integer director) {
+    public void setDirector(Director director) {
         this.director = director;
+        if (director != null) {
+            director.getFilms().add(this);
+        }
+    }
+
+    public Set<Actor> getActors() {
+        if (actors == null) {
+            actors = new HashSet<>();
+        }
+        return actors;
+    }
+
+    public void setActors(Set<Actor> actors) {
+        this.actors = actors;
+    }
+
+    public void addActor(Actor actor) {
+        getActors().add(actor);
     }
 
     @Override
@@ -68,5 +96,18 @@ public class Film {
                 ", title='" + title + '\'' +
                 ", director=" + director +
                 '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Film film = (Film) o;
+        return id == film.id && Objects.equals(title, film.title);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, title);
     }
 }

@@ -4,6 +4,7 @@ import org.example.dao.ActorDao;
 import org.example.dao.ActorFilmDao;
 import org.example.dao.FilmDao;
 import org.example.model.Actor;
+import org.example.model.Director;
 import org.example.model.Film;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
@@ -76,7 +77,7 @@ public class ActorFilmDaoTest {
         Actor actor = createActor(actorName);
 
         //Создание случайного фильма без записи в базу данных
-        Film film = new Film(RandomUtils.nextInt(), RandomStringUtils.randomAlphabetic(10), RandomUtils.nextInt());
+        Film film = new Film(RandomUtils.nextInt(), RandomStringUtils.randomAlphabetic(10), new Director());
 
         //Одидаем исключение при попытке связать актёра с несуществующим фильмом
         Assertions.assertThrows(Exception.class, () -> actorFilmDao.linkActorWithFilm(actor, film));
@@ -114,18 +115,19 @@ public class ActorFilmDaoTest {
         //Создание связи
         actorFilmDao.linkActorWithFilm(actor, film);
 
-        //Попытка удалить фильм. Ожидается исключение, т.к нельзя удалить фильм, имеющий привязанных актёров
-        Assertions.assertThrows(Exception.class,() -> filmDao.delete(film.getId()));
-
         //Попытка удалить актёра
-        Assertions.assertThrows(Exception.class,() -> actorDao.delete(actor.getId()));
+        Assertions.assertThrows(Exception.class, () -> actorDao.delete(actor.getId()));
+
+        //Попытка удалить фильм. Ожидается исключение, т.к нельзя удалить фильм, имеющий привязанных актёров
+        Assertions.assertThrows(Exception.class, () -> filmDao.delete(film.getId()));
+
     }
 
     /**
      * Проверка удаления связи актёра и фильма
      */
     @Test
-    public void deleteLinkTest(){
+    public void deleteLinkTest() {
 
         //Создание фильма
         String filmTitle = RandomStringUtils.randomAlphabetic(10);
