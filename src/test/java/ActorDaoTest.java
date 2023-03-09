@@ -1,5 +1,4 @@
 import org.apache.commons.lang3.RandomStringUtils;
-import org.example.dao.ActorDao;
 import org.example.model.Actor;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;

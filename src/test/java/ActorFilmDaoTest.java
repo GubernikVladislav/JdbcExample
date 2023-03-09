@@ -1,8 +1,5 @@
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.RandomUtils;
-import org.example.dao.ActorDao;
-import org.example.dao.ActorFilmDao;
-import org.example.dao.FilmDao;
 import org.example.model.Actor;
 import org.example.model.Film;
 import org.junit.jupiter.api.Assertions;

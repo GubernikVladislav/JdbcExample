@@ -1,0 +1,25 @@
+<?xml version="1.0"?>
+<!DOCTYPE hibernate-mapping PUBLIC
+        "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+        "http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+    <class name="org.example.entity.User" table="userdata">
+        <id name="id">
+            <generator class="identity"/>
+        </id>
+        <property name="name" column="name"/>
+        <set name="documents">
+            <key column="user_id"/>
+            <one-to-many class="org.example.entity.Document"/>
+        </set>
+    </class>
+
+    <class name="org.example.entity.Document" table="document">
+        <id name="id">
+            <generator class="native"/>
+        </id>
+        <property name="type" column="type"/>
+        <property name="number" column="number"/>
+        <many-to-one name="user" class="org.example.entity.User" column="user_id"/>
+    </class>
+</hibernate-mapping>

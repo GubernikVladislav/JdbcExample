@@ -1,25 +1,20 @@
-package org.example.model;
+package org.example.entity;
 
-/**
- * Актёр
- */
-public class Actor {
+import java.util.HashSet;
+import java.util.Set;
 
-    /**
-     * Идентификатор
-     */
+public class User {
+
     private int id;
 
-    /**
-     * ФИО
-     */
     private String name;
 
-    public Actor(String name) {
-        this.name = name;
+    private Set<Document> documents;
+
+    public User() {
     }
 
-    public Actor(int id, String name) {
+    public User(int id, String name) {
         this.id = id;
         this.name = name;
     }
@@ -40,9 +35,22 @@ public class Actor {
         this.name = name;
     }
 
+    public Set<Document> getDocuments() {
+
+        if (documents == null) {
+            documents = new HashSet<>();
+        }
+
+        return documents;
+    }
+
+    public void setDocuments(Set<Document> documents) {
+        this.documents = documents;
+    }
+
     @Override
     public String toString() {
-        return "Actor{" +
+        return "User{" +
                 "id=" + id +
                 ", name='" + name + '\'' +
                 '}';
