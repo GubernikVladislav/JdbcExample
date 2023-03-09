@@ -4,9 +4,29 @@
 
 После установки и запука БД (базы данных), необходимо выполнить скрипт создания таблицы:
 
-    CREATE TABLE USERDATA(
-        NAME VARCHAR,
-        AGE INTEGER
+    CREATE TABLE IF NOT EXISTS DIRECTOR(
+        ID SERIAL PRIMARY KEY,
+        NAME VARCHAR NOT NULL
+    );
+    
+    CREATE TABLE IF NOT EXISTS ACTOR(
+        ID SERIAL PRIMARY KEY,
+        NAME VARCHAR NOT NULL
+    );
+    
+    CREATE TABLE IF NOT EXISTS FILM(
+        ID SERIAL PRIMARY KEY,
+        TITLE VARCHAR NOT NULL,
+        DIRECTOR_ID INTEGER,
+        FOREIGN KEY (DIRECTOR_ID) REFERENCES DIRECTOR(ID)
+    );
+    
+    CREATE TABLE IF NOT EXISTS ACTOR_FILM(
+        FILM_ID INTEGER  NOT NULL,
+        ACTOR_ID INTEGER  NOT NULL,
+        PRIMARY KEY(FILM_ID, ACTOR_ID),
+        FOREIGN KEY (FILM_ID) REFERENCES FILM(ID),
+        FOREIGN KEY (ACTOR_ID) REFERENCES ACTOR(ID)
     );
 
 Для доступа в БД и выполнения скрипта можно использовать PgAdmin4, который устанавливается вместе с базой данных, его можно найти через поиск Windows.
