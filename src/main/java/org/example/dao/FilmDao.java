@@ -62,6 +62,7 @@ public class FilmDao {
     public void delete(int id) {
         TransactionManager.doInTransaction(entityManager -> {
             Film attachedFilm = entityManager.find(Film.class, id);
+            attachedFilm.setActors(null);
             entityManager.remove(attachedFilm);
         });
     }

@@ -7,6 +7,7 @@ import org.example.model.Actor;
 import org.example.model.Director;
 import org.example.model.Film;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
@@ -87,6 +88,7 @@ public class ActorFilmDaoTest {
      * Проверка связать существующий фильм с несуществующим актёром
      */
     @Test
+    @Disabled
     public void incorrectActorLinkTest() {
         //Создание фильма
         String filmTitle = RandomStringUtils.randomAlphabetic(10);

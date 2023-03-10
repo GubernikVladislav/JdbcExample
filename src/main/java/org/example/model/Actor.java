@@ -1,5 +1,6 @@
 package org.example.model;
 
+import javax.persistence.*;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -7,22 +8,21 @@ import java.util.Set;
 /**
  * Актёр
  */
-public class Actor {
-
-    /**
-     * Идентификатор
-     */
-    private int id;
+@Entity
+@Table(name = "ACTOR")
+public class Actor extends IdentifiedEntity {
 
     /**
      * ФИО
      */
+    @Column(name = "NAME")
     private String name;
 
     /**
      * Список фильмов
      */
-    private Set<ActorFilm> films;
+    @ManyToMany(mappedBy = "actors")
+    private Set<Film> films;
 
     public Actor() {
     }
@@ -32,16 +32,8 @@ public class Actor {
     }
 
     public Actor(int id, String name) {
-        this.id = id;
+        super(id);
         this.name = name;
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
     }
 
     public String getName() {
@@ -52,35 +44,41 @@ public class Actor {
         this.name = name;
     }
 
-    public Set<ActorFilm> getFilms() {
+    public Set<Film> getFilms() {
         if (films == null) {
             films = new HashSet<>();
         }
         return films;
     }
 
-    public void setFilms(Set<ActorFilm> films) {
+    public void setFilms(Set<Film> films) {
         this.films = films;
     }
 
-    @Override
-    public String toString() {
-        return "Actor{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                '}';
+    public void removeFilm(Film film) {
+        getFilms().remove(film);
+        film.getActors().remove(this);
+    }
+
+    @PreRemove
+    public void preRemove() {
+        getFilms().forEach(film -> {
+            film.removeActor(this);
+            getFilms().remove(film);
+        });
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
         Actor actor = (Actor) o;
-        return id == actor.id && Objects.equals(name, actor.name);
+        return Objects.equals(name, actor.name);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name);
+        return Objects.hash(super.hashCode(), name);
     }
 }

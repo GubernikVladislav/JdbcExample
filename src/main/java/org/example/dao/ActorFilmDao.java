@@ -1,8 +1,6 @@
 package org.example.dao;
 
 import org.example.model.Actor;
-import org.example.model.ActorFilm;
-import org.example.model.ActorFilmId;
 import org.example.model.Film;
 import org.example.utils.DbConnector;
 
@@ -24,17 +22,11 @@ public class ActorFilmDao {
         EntityManager entityManager = DbConnector.getEntityManager();
         entityManager.getTransaction().begin();
 
-        Actor findActor = entityManager.find(Actor.class, actor.getId());
-        if (findActor == null) {
-            throw new RuntimeException("Не найден актёр");
-        }
+        Film attachedFilm = entityManager.merge(film);
+        Actor attachedActor = entityManager.merge(actor);
+        attachedFilm.getActors().add(attachedActor);
 
-        Film findFilm = entityManager.find(Film.class, film.getId());
-        if (findFilm == null) {
-            throw new RuntimeException("Не найден фильм");
-        }
-
-        entityManager.persist(new ActorFilm(new ActorFilmId(findActor, findFilm)));
+        entityManager.persist(attachedFilm);
 
         entityManager.getTransaction().commit();
     }
@@ -62,7 +54,7 @@ public class ActorFilmDao {
         EntityManager entityManager = DbConnector.getEntityManager();
         Actor findedActor = entityManager.find(Actor.class, actor.getId());
 
-        return findedActor.getFilms().stream().map(item -> item.getId().getFilm()).toList();
+        return findedActor.getFilms().stream().toList();
     }
 
     /**
@@ -75,8 +67,9 @@ public class ActorFilmDao {
         EntityManager entityManager = DbConnector.getEntityManager();
         entityManager.getTransaction().begin();
 
-        ActorFilm actorFilm = entityManager.find(ActorFilm.class, new ActorFilmId(actor, film));
-        entityManager.remove(actorFilm);
+        Film attachedFilm = entityManager.merge(film);
+        attachedFilm.removeActor(actor);
+        entityManager.persist(attachedFilm);
 
         entityManager.getTransaction().commit();
     }

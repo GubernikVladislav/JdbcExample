@@ -6,7 +6,9 @@
 
     <persistence-unit name="main-unit">
         <provider>org.hibernate.ejb.HibernatePersistence</provider>
-        <mapping-file>/META-INF/orm-mapping.xml</mapping-file>
+        <class>org.example.model.Director</class>
+        <class>org.example.model.Film</class>
+        <class>org.example.model.Actor</class>
         <properties>
             <property name="javax.persistence.jdbc.driver" value="org.postgresql.Driver"/>
             <property name="javax.persistence.jdbc.url" value="jdbc:postgresql://localhost:5432/postgres"/>

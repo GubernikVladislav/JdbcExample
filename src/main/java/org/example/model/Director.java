@@ -1,5 +1,9 @@
 package org.example.model;
 
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -7,21 +11,20 @@ import java.util.Set;
 /**
  * Режисёр
  */
-public class Director {
-
-    /**
-     * Идентификатор
-     */
-    private int id;
+@Entity
+@Table(name = "DIRECTOR")
+public class Director extends IdentifiedEntity {
 
     /**
      * ФИО
      */
+    @Column(name = "NAME")
     private String name;
 
     /**
      * Список фильмов
      */
+    @OneToMany(mappedBy = "director")
     private Set<Film> films;
 
     public Director() {
@@ -32,16 +35,8 @@ public class Director {
     }
 
     public Director(int id, String name) {
-        this.id = id;
+        super(id);
         this.name = name;
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
     }
 
     public String getName() {
@@ -65,23 +60,24 @@ public class Director {
     }
 
     @Override
-    public String toString() {
-        return "Director{" +
-                "id=" + id +
-                ", name='" + name + '\'' +
-                '}';
-    }
-
-    @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
+        if (!super.equals(o)) return false;
         Director director = (Director) o;
-        return id == director.id && Objects.equals(name, director.name) && Objects.equals(films, director.films);
+        return Objects.equals(name, director.name);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(id, name, films);
+        return Objects.hash(super.hashCode(), name);
+    }
+
+    @Override
+    public String toString() {
+        return "Director{" +
+                "name='" + name + '\'' +
+                ", films=" + films +
+                '}';
     }
 }
